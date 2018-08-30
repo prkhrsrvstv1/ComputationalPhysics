@@ -19,6 +19,7 @@ function [eigenvalues, eigenvectors] = jacobiMethod(A)
     tolerance = 10e-10; changes = 1;
     U = eye(n);
 
+    % The loop will run till all the off diagonal elements are < tolerance.
     while changes > 0
 
         changes = 0;
