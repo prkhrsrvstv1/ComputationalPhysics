@@ -38,14 +38,24 @@ function [eigenvalues, eigenvectors] = jacobiMethod(A)
                 theta = 0.5 * atan(tau);
                 % Generating the rotation matrix required
                 R = eye(n);
-                R(p, p) = cos(theta);
-                R(p, q) = sin(theta);
-                R(q, p) = -sin(theta);
-                R(q, q) = cos(theta);
+                c = cos(theta);
+                s = sin(theta);
+                R(p, p) = c;
+                R(p, q) = s;
+                R(q, p) = -s;
+                R(q, q) = c;
 
                 % Performing the rotation
-                A = R' * A * R;
-
+                newA = A;
+                newA(p, p+1:end) = c * A(p, p+1:end) - s * A(q, p+1:end);
+                newA(p+1:end, p) = newA(p, p+1:end)';
+                newA(q, q+1:end) = c * A(q, q+1:end) + s * A(p, q+1:end);
+                newA(q+1:end, q) = newA(q, q+1:end)';
+                newA(p, p) = c^2 * A(p, p) + s^2 * A(q, q) - 2 * c * s * A(p, q);
+                newA(q, q) = s^2 * A(p, p) + c^2 * A(q, q) + 2 * c * s * A(p, q);
+                newA(p, q) = newA(q, p) = (c^2 - s^2) * A(p, q) + c * s * (A(p, p) - A(q, q));
+                A = newA;
+                
                 % Adding the new rotation to the composite operator
                 U = U * R;
 
@@ -53,11 +63,6 @@ function [eigenvalues, eigenvectors] = jacobiMethod(A)
         endfor
     
     endwhile
-
-    fprintf("\n")
-    disp(U);
-    fprintf("\n")
-    disp(A);
 
     eigenvalues = sum(A);
     eigenvectors = U;
